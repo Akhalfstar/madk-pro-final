@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Map</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChIT7l6tk2raY7eAU1kKy_b4G66ww_rJw&libraries=places"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+
+
+
+
+</head>
+<body>
+  <div id="map" style="height: 400px;"></div>
+
+
+
+<script>
+  function initMap() {
+    const map = new google.maps.Map(document.getElementById('map'), {
+      center: { lat: 24.8273, lng: 92.7970 },
+      zoom: 15,
+    });
+
+    <% locations.forEach(function(location, index) { %>
+      var markerColor = '<%= index === locations.length - 1 ? "#FF0000" : "#0000FF" %>'; // Red for last, Blue for others
+
+      new google.maps.Marker({
+        position: { lat: <%= location.latitude %>, lng: <%= location.longitude %> },
+        map: map,
+        title: 'Location',
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: markerColor,
+          fillOpacity: 1,
+          strokeColor: markerColor,
+          strokeWeight: 2,
+          scale: 8
+        }
+      });
+    <% }); %>
+  }
+</script>
+
+
+
+
+ <script>
+        const socket = io(); // Connect to the WebSocket server
+
+        const initialLocations = <%= JSON.stringify(locations) %>; // Pass locations data as a JSON object
+        
+        // Iterate through initialLocations and add markers to the map
+        initialLocations.forEach(location => {
+            const marker = new google.maps.Marker({
+                position: { lat: location.latitude, lng: location.longitude },
+                map: map,
+                title: 'Location'
+            });
+        });
+
+        socket.on('newLocation', (location) => {
+            // Create a new marker for the new location
+            const marker = new google.maps.Marker({
+                position: { lat: location.latitude, lng: location.longitude },
+                map: map,
+                title: 'New Location'
+            });
+        });
+    </script>
+
+
+
+
+
+  <!-- Call the initMap function when the Google Maps script is loaded -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChIT7l6tk2raY7eAU1kKy_b4G66ww_rJw&callback=initMap" async defer></script>
+  </script>
+
+</body>
+</html>
